@@ -2,18 +2,25 @@ package route
 
 import (
 	"awesomeProject/route/score"
-	"awesomeProject/route/user"
+	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 )
 
-type appHandel func(res http.ResponseWriter, req *http.Request) error
+func Register(engine *gin.Engine) {
+	RegisterScores(engine)
+	RegisterUsers(engine)
+}
 
-func RegisterRoutes() {
-	http.HandleFunc("/login", errWrapper(user.LoginUser))
-	log.Println("/login")
-	http.HandleFunc("/upload", errWrapper(score.UploadScore))
+func RegisterScores(engine *gin.Engine) {
+	scoreGroup := engine.Group("/score")
+	scoreGroup.POST("upload", Decorate(score.UploadScore))
 	log.Println("/upload")
-	http.HandleFunc("/get", errWrapper(score.GetStudentScores))
+	scoreGroup.GET("get", Decorate(score.GetStudentScores))
 	log.Println("/get")
+}
+
+func RegisterUsers(engine *gin.Engine) {
+	//http.HandleFunc("/login", errWrapper(user.LoginUser))
+	//log.Println("/login")
+
 }

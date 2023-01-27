@@ -1,15 +1,20 @@
 package route
 
-import "net/http"
+import (
+	"awesomeProject/response"
+	"github.com/gin-gonic/gin"
+)
 
-func errWrapper(handler appHandel) func(res http.ResponseWriter, req *http.Request) {
-	return func(res http.ResponseWriter, req *http.Request) {
-		err := handler(res, req)
-		if err != nil {
-			code := http.StatusInternalServerError
-			switch {
-			}
-			http.Error(res, err.Error(), code)
+type Handler func(ctx *gin.Context) *response.Response
+
+// 装饰器
+func Decorate(h Handler) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		r := h(ctx)
+		if r != nil {
+			ctx.JSON(r.HttpStatus, &r.R)
 		}
+
+		response.PutResponse(r)
 	}
 }

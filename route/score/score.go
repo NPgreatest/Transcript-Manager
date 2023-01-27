@@ -3,25 +3,26 @@ package score
 import (
 	"awesomeProject/entities"
 	"awesomeProject/lib"
+	"awesomeProject/response"
 	"awesomeProject/service"
 	"awesomeProject/utils"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 	"strconv"
 )
 
-func UploadScore(res http.ResponseWriter, req *http.Request) error {
+func UploadScore(ctx *gin.Context) *response.Response {
 	fmt.Print("begin upload\n")
-	credit, cerr := strconv.ParseFloat(req.FormValue("credit"), 64)
+	credit, cerr := strconv.ParseFloat(ctx.Query("credit"), 64)
 	if cerr != nil {
-		return cerr
+		return response.ResponseQueryFailed()
 	}
-	score, cerr := strconv.ParseFloat(req.FormValue("score"), 64)
+	score, cerr := strconv.ParseFloat(ctx.Query("score"), 64)
 	login_info := &lib.ReqGetScore{
-		Uid:    req.FormValue("uid"),
-		Name:   req.FormValue("name"),
+		Uid:    ctx.Query("uid"),
+		Name:   ctx.Query("name"),
 		Credit: credit,
 		Score:  score,
 	}
@@ -30,17 +31,17 @@ func UploadScore(res http.ResponseWriter, req *http.Request) error {
 	insert = append(insert, entities.Scores{login_info.Uid, utils.GenerateId(), login_info.Name, login_info.Credit, login_info.Score, 0, 0})
 	fmt.Println(insert)
 	userDB.InsertScoresSql(insert)
-	return nil
+	return response.ResponseOperateSuccess()
 }
 
-func GetStudentScores(res http.ResponseWriter, req *http.Request) error {
+func GetStudentScores(ctx *gin.Context) *response.Response {
 	fmt.Printf("begin getting score\n")
-	uid := req.FormValue("uid")
+	uid := ctx.Query("uid")
 	userDB := service.NewUserDB()
 	scores, SelectStudentScoreErr := userDB.GetScoresSql(uid)
 	if SelectStudentScoreErr != nil {
 		log.Println(SelectStudentScoreErr.Error())
-		return SelectStudentScoreErr
+		return response.ResponseQueryFailed()
 	}
 	resScores := lib.ResGetScores{
 		Code:  1,
@@ -49,11 +50,7 @@ func GetStudentScores(res http.ResponseWriter, req *http.Request) error {
 	}
 	marshal, MarshalErr := json.Marshal(resScores)
 	if MarshalErr != nil {
-		return MarshalErr
+		return response.ResponseQueryFailed()
 	}
-	_, err := res.Write(marshal)
-	if err != nil {
-		return err
-	}
-	return nil
+	return response.ResponseQuerySuccess(marshal)
 }
