@@ -2,19 +2,19 @@ package user
 
 import (
 	"awesomeProject/lib"
+	"awesomeProject/response"
 	"awesomeProject/service"
 	"fmt"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
-func LoginUser(res http.ResponseWriter, req *http.Request) error {
+func LoginUser(ctx *gin.Context) *response.Response {
 	fmt.Print("begin login...\n")
 	login_info := &lib.ReqGetUser{
-		Id:       req.FormValue("id"),
-		Password: req.FormValue("password"),
+		Id:       ctx.Query("id"),
+		Password: ctx.Query("password"),
 	}
-	userDB := service.NewUserDB()
-	success := userDB.ConfirmLogin(login_info)
+	success := service.ConfirmLogin(login_info)
 	if success == true {
 		fmt.Println("login sucess")
 		return nil

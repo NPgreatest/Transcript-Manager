@@ -6,7 +6,6 @@ import (
 	"awesomeProject/response"
 	"awesomeProject/service"
 	"awesomeProject/utils"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -26,31 +25,26 @@ func UploadScore(ctx *gin.Context) *response.Response {
 		Credit: credit,
 		Score:  score,
 	}
-	userDB := service.NewUserDB()
 	insert := make([]entities.Scores, 0, 0)
 	insert = append(insert, entities.Scores{login_info.Uid, utils.GenerateId(), login_info.Name, login_info.Credit, login_info.Score, 0, 0})
 	fmt.Println(insert)
-	userDB.InsertScoresSql(insert)
+	service.InsertScoresSql(insert)
 	return response.ResponseOperateSuccess()
 }
 
 func GetStudentScores(ctx *gin.Context) *response.Response {
 	fmt.Printf("begin getting score\n")
 	uid := ctx.Query("uid")
-	userDB := service.NewUserDB()
-	scores, SelectStudentScoreErr := userDB.GetScoresSql(uid)
+	scores, SelectStudentScoreErr := service.GetScoresSql(uid)
 	if SelectStudentScoreErr != nil {
 		log.Println(SelectStudentScoreErr.Error())
 		return response.ResponseQueryFailed()
 	}
-	resScores := lib.ResGetScores{
-		Code:  1,
-		Data:  scores,
-		Count: 0,
-	}
-	marshal, MarshalErr := json.Marshal(resScores)
-	if MarshalErr != nil {
-		return response.ResponseQueryFailed()
-	}
-	return response.ResponseQuerySuccess(marshal)
+	return response.ResponseQuerySuccess(scores)
+}
+
+func GetAllAlgorithm(ctx *gin.Context) *response.Response {
+	fmt.Printf("Getting all algorithm...")
+	res := service.GetAlgorithm("")
+	return response.ResponseQuerySuccess(res)
 }

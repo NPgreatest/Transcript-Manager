@@ -2,6 +2,7 @@ package route
 
 import (
 	"awesomeProject/route/score"
+	"awesomeProject/route/user"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -13,14 +14,14 @@ func Register(engine *gin.Engine) {
 
 func RegisterScores(engine *gin.Engine) {
 	scoreGroup := engine.Group("/score")
-	scoreGroup.POST("upload", Decorate(score.UploadScore))
-	log.Println("/upload")
-	scoreGroup.GET("get", Decorate(score.GetStudentScores))
-	log.Println("/get")
+	scoreGroup.POST("/upload", Decorate(score.UploadScore))
+	scoreGroup.GET("/get", Decorate(score.GetStudentScores))
+	scoreGroup.GET("/getalg", Decorate(score.GetAllAlgorithm))
 }
 
 func RegisterUsers(engine *gin.Engine) {
-	//http.HandleFunc("/login", errWrapper(user.LoginUser))
-	//log.Println("/login")
+	userGroup := engine.Group("/user")
+	userGroup.GET("login", Decorate(user.LoginUser))
+	log.Println("/login")
 
 }

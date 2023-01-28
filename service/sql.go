@@ -2,17 +2,18 @@ package service
 
 import (
 	"awesomeProject/entities"
+	"awesomeProject/lib/db"
 	"log"
 	"strings"
 )
 
-func (s *UserDB) InsertScoresSql(scores []entities.Scores) error {
+func InsertScoresSql(scores []entities.Scores) error {
 	sql := BuildInsertScoresSql(scores)
 	value := make([]interface{}, 0)
 	for i := range scores {
 		value = append(value, scores[i].Uid, scores[i].Sid, scores[i].Name, scores[i].Credit, scores[i].Score, scores[i].Status, scores[i].Classify)
 	}
-	prepare, PrepareErr := s.DB.Prepare(sql)
+	prepare, PrepareErr := db.DB.Prepare(sql)
 	if PrepareErr != nil {
 		return PrepareErr
 	}
@@ -23,9 +24,9 @@ func (s *UserDB) InsertScoresSql(scores []entities.Scores) error {
 	return nil
 }
 
-func (s *UserDB) GetScoresSql(uid string) ([]entities.Scores, error) {
+func GetScoresSql(uid string) ([]entities.Scores, error) {
 	sql := "SELECT * FROM scores WHERE uid=?"
-	prepare, PrepareErr := s.DB.Prepare(sql)
+	prepare, PrepareErr := db.DB.Prepare(sql)
 	if PrepareErr != nil {
 		return nil, PrepareErr
 	}
