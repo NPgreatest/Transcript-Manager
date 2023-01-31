@@ -1,9 +1,11 @@
 package utils
 
-import "github.com/bwmarrin/snowflake"
+import (
+	"github.com/bwmarrin/snowflake"
+)
 
-func GenerateId() string {
-	node, err := snowflake.NewNode(1)
+func GenerateId(x int64) string {
+	node, err := snowflake.NewNode(x)
 	if err != nil {
 		return ""
 	}

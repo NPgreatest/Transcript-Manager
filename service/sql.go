@@ -3,16 +3,24 @@ package service
 import (
 	"awesomeProject/entities"
 	"awesomeProject/lib/db"
+	"awesomeProject/utils"
+	"bufio"
+	"fmt"
+	"github.com/axgle/mahonia"
 	"log"
+	"mime/multipart"
+	"strconv"
 	"strings"
 )
 
 func InsertScoresSql(scores []entities.Scores) error {
 	sql := BuildInsertScoresSql(scores)
+	fmt.Println(sql)
 	value := make([]interface{}, 0)
 	for i := range scores {
 		value = append(value, scores[i].Uid, scores[i].Sid, scores[i].Name, scores[i].Credit, scores[i].Score, scores[i].Status, scores[i].Classify)
 	}
+	fmt.Print(value)
 	prepare, PrepareErr := db.DB.Prepare(sql)
 	if PrepareErr != nil {
 		return PrepareErr
@@ -20,6 +28,45 @@ func InsertScoresSql(scores []entities.Scores) error {
 	_, ExecErr := prepare.Exec(value...)
 	if ExecErr != nil {
 		return ExecErr
+	}
+	return nil
+}
+
+func SaveScores(files *multipart.FileHeader, name string) error {
+	fmt.Println("begin saving scores")
+	var enc mahonia.Decoder
+	enc = mahonia.NewDecoder("gbk")
+	file, err := files.Open()
+	if err != nil {
+		return err
+	}
+	scanner := bufio.NewScanner(file)
+	scores := make([]entities.Scores, 0)
+	var count int64 = 0
+	for scanner.Scan() {
+		s := entities.Scores{}
+		content := scanner.Text()
+		content = enc.ConvertString(content)
+		info := strings.Split(content, " ")
+		s.Name = info[0]
+		s.Credit, err = strconv.ParseFloat(info[1], 64)
+		if err != nil {
+			return err
+		}
+		s.Score, err = strconv.ParseFloat(info[2], 64)
+		if err != nil {
+			return err
+		}
+		s.Uid = name
+		s.Sid = utils.GenerateId(count)
+		s.Classify = 0
+		s.Status = 0
+		scores = append(scores, s)
+		count += 1
+	}
+	error := InsertScoresSql(scores)
+	if err != nil {
+		return error
 	}
 	return nil
 }
@@ -49,10 +96,14 @@ func BuildInsertScoresSql(scores []entities.Scores) string {
 	insert := "INSERT INTO scores VALUES"
 	buf := strings.Builder{}
 	buf.WriteString(insert)
-	for range scores {
+	for index, _ := range scores {
 		buf.WriteString("(")
 		buf.WriteString("?,?,?,?,?,?,?")
-		buf.WriteString(")")
+		if index == len(scores)-1 {
+			buf.WriteString(")")
+		} else {
+			buf.WriteString("),")
+		}
 	}
 	sql := buf.String()
 	return sql

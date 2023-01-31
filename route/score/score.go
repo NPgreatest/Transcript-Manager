@@ -26,9 +26,21 @@ func UploadScore(ctx *gin.Context) *response.Response {
 		Score:  score,
 	}
 	insert := make([]entities.Scores, 0, 0)
-	insert = append(insert, entities.Scores{login_info.Uid, utils.GenerateId(), login_info.Name, login_info.Credit, login_info.Score, 0, 0})
+	insert = append(insert, entities.Scores{login_info.Uid, utils.GenerateId(1), login_info.Name, login_info.Credit, login_info.Score, 0, 0})
 	fmt.Println(insert)
 	service.InsertScoresSql(insert)
+	return response.ResponseOperateSuccess()
+}
+
+func UploadScoreFile(ctx *gin.Context) *response.Response {
+	file, err := ctx.FormFile("filename")
+	if err != nil {
+		return response.ResponseQueryFailed()
+	}
+	error := service.SaveScores(file, ctx.Query("uid"))
+	if error != nil {
+		return response.ResponseQueryFailed()
+	}
 	return response.ResponseOperateSuccess()
 }
 
