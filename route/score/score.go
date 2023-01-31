@@ -12,6 +12,14 @@ import (
 	"strconv"
 )
 
+func GetStudentGPA(ctx *gin.Context) *response.Response {
+	res, err := service.GetGPAGroup(ctx.Query("uid"), ctx.Query("alg"))
+	if err != nil {
+		return response.ResponseQueryFailed()
+	}
+	return response.ResponseQuerySuccess(res)
+}
+
 func UploadScore(ctx *gin.Context) *response.Response {
 	fmt.Print("begin upload\n")
 	credit, cerr := strconv.ParseFloat(ctx.Query("credit"), 64)
@@ -26,8 +34,7 @@ func UploadScore(ctx *gin.Context) *response.Response {
 		Score:  score,
 	}
 	insert := make([]entities.Scores, 0, 0)
-	insert = append(insert, entities.Scores{login_info.Uid, utils.GenerateId(1), login_info.Name, login_info.Credit, login_info.Score, 0, 0})
-	fmt.Println(insert)
+	insert = append(insert, entities.Scores{login_info.Uid, utils.GenerateId(1), login_info.Name, login_info.Credit, login_info.Score, 0, 0, 0})
 	service.InsertScoresSql(insert)
 	return response.ResponseOperateSuccess()
 }

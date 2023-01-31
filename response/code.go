@@ -16,6 +16,13 @@ const (
 	DeleteSuccess
 )
 
+const (
+	COMMON = iota
+	PRIMARY
+	RETAKE
+	EXEMPT
+)
+
 var MessageForCode = map[uint32]string{
 	QuerySuccess:   "查询成功",
 	QueryFailed:    "查询失败",

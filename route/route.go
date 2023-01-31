@@ -17,6 +17,7 @@ func RegisterScores(engine *gin.Engine) {
 	scoreGroup.POST("/upload", Decorate(score.UploadScore))
 	scoreGroup.POST("/uploadfromfile", Decorate(score.UploadScoreFile))
 	scoreGroup.GET("/get", Decorate(score.GetStudentScores))
+	scoreGroup.GET("/getgpa", Decorate(score.GetStudentGPA))
 	scoreGroup.GET("/getalg", Decorate(score.GetAllAlgorithm))
 }
 

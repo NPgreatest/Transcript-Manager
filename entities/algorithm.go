@@ -28,6 +28,7 @@ func GetPoint(alg Algorithm, score float64) float64 {
 			return value.Point
 		}
 	}
+	fmt.Println("Something went wrong when calculating GPA")
 	return 0
 }
 

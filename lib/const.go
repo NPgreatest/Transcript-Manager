@@ -9,6 +9,5 @@ const (
 const (
 	PROFESSION = iota
 	ELECTIVE
-	BASIC
 	POLITICS
 )

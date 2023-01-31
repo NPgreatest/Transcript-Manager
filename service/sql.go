@@ -15,12 +15,10 @@ import (
 
 func InsertScoresSql(scores []entities.Scores) error {
 	sql := BuildInsertScoresSql(scores)
-	fmt.Println(sql)
 	value := make([]interface{}, 0)
 	for i := range scores {
-		value = append(value, scores[i].Uid, scores[i].Sid, scores[i].Name, scores[i].Credit, scores[i].Score, scores[i].Status, scores[i].Classify)
+		value = append(value, scores[i].Uid, scores[i].Sid, scores[i].Name, scores[i].Credit, scores[i].Score, scores[i].Status, scores[i].Classify, scores[i].Append)
 	}
-	fmt.Print(value)
 	prepare, PrepareErr := db.DB.Prepare(sql)
 	if PrepareErr != nil {
 		return PrepareErr
@@ -59,8 +57,24 @@ func SaveScores(files *multipart.FileHeader, name string) error {
 		}
 		s.Uid = name
 		s.Sid = utils.GenerateId(count)
-		s.Classify = 0
-		s.Status = 0
+		if len(info) > 3 && utils.ConverText(info[3]) != -1 {
+			s.Status = utils.ConverText(info[3])
+		} else {
+			s.Status = -1
+		}
+		if len(info) > 4 && utils.ConverText(info[4]) != -1 {
+			s.Classify = utils.ConverText(info[4])
+		} else {
+			s.Classify = -1
+		}
+		if len(info) > 5 {
+			flt, err := strconv.ParseFloat(info[5], 64)
+			if err != nil {
+				s.Append = 0
+			} else {
+				s.Append = flt
+			}
+		}
 		scores = append(scores, s)
 		count += 1
 	}
@@ -84,7 +98,7 @@ func GetScoresSql(uid string) ([]entities.Scores, error) {
 	scores := make([]entities.Scores, 0)
 	for Query.Next() {
 		score := entities.Scores{}
-		if err := Query.Scan(&score.Uid, &score.Sid, &score.Name, &score.Credit, &score.Score, &score.Status, &score.Classify); err != nil {
+		if err := Query.Scan(&score.Uid, &score.Sid, &score.Name, &score.Credit, &score.Score, &score.Status, &score.Classify, &score.Append); err != nil {
 			log.Println(err.Error())
 		}
 		scores = append(scores, score)
@@ -98,7 +112,7 @@ func BuildInsertScoresSql(scores []entities.Scores) string {
 	buf.WriteString(insert)
 	for index, _ := range scores {
 		buf.WriteString("(")
-		buf.WriteString("?,?,?,?,?,?,?")
+		buf.WriteString("?,?,?,?,?,?,?,?")
 		if index == len(scores)-1 {
 			buf.WriteString(")")
 		} else {

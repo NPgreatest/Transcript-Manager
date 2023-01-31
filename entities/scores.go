@@ -8,4 +8,5 @@ type Scores struct {
 	Score    float64 `json:"score"`
 	Status   int     `json:"status"`
 	Classify int     `json:"classify"`
+	Append   float64 `json:"append"`
 }

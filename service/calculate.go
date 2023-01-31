@@ -9,7 +9,7 @@ func GetAlgorithm(name string) []entities.Algorithm {
 	var res []entities.Algorithm
 	var sqlRes []entities.Section
 	sql1 := "SELECT * FROM algorithms"
-	sql2 := "SELECT low,high,point,comment FROM algorithms WHERE name=?"
+	sql2 := "SELECT * FROM algorithms WHERE name=?"
 	if name == "" {
 		db.DB.Select(&sqlRes, sql1)
 	} else {
@@ -20,9 +20,8 @@ func GetAlgorithm(name string) []entities.Algorithm {
 	}
 	flag := sqlRes[0].Name
 	var temp []entities.Section
-	//fmt.Println(sqlRes)
 	for index, value := range sqlRes {
-		if value.Name != flag || index == len(sqlRes)-1 {
+		if value.Name != flag {
 			flag = value.Name
 			app, err := entities.NewAlgorithm(temp[0].Name, temp)
 			if err != nil {
@@ -31,6 +30,14 @@ func GetAlgorithm(name string) []entities.Algorithm {
 			res = append(res, *app)
 			temp = nil
 			temp = append(temp, value)
+		} else if index == len(sqlRes)-1 {
+			flag = value.Name
+			temp = append(temp, value)
+			app, err := entities.NewAlgorithm(temp[0].Name, temp)
+			if err != nil {
+				return nil
+			}
+			res = append(res, *app)
 		} else {
 			temp = append(temp, value)
 			//fmt.Println(index, temp)
