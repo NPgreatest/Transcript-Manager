@@ -4,7 +4,6 @@ import (
 	"awesomeProject/route/score"
 	"awesomeProject/route/user"
 	"github.com/gin-gonic/gin"
-	"log"
 )
 
 func Register(engine *gin.Engine) {
@@ -22,8 +21,8 @@ func RegisterScores(engine *gin.Engine) {
 }
 
 func RegisterUsers(engine *gin.Engine) {
+	engine.POST("/user/login", Decorate(user.LoginUser))
 	userGroup := engine.Group("/user")
-	userGroup.GET("login", Decorate(user.LoginUser))
-	log.Println("/login")
+	userGroup.Use(user.LoginAuthenticationMiddleware())
 
 }
