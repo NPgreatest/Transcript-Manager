@@ -13,7 +13,9 @@ import (
 )
 
 func GetStudentGPA(ctx *gin.Context) *response.Response {
-	res, err := service.GetGPAGroup(ctx.Query("uid"), ctx.Query("alg"))
+	token := ctx.GetHeader("Authorization")
+	uid, _ := utils.VerifyToken(token)
+	res, err := service.GetGPAGroup(uid, ctx.Query("alg"))
 	if err != nil {
 		return response.ResponseQueryFailed()
 	}
@@ -22,13 +24,15 @@ func GetStudentGPA(ctx *gin.Context) *response.Response {
 
 func UploadScore(ctx *gin.Context) *response.Response {
 	fmt.Print("begin upload\n")
+	token := ctx.GetHeader("Authorization")
+	uid, _ := utils.VerifyToken(token)
 	credit, cerr := strconv.ParseFloat(ctx.Query("credit"), 64)
 	if cerr != nil {
 		return response.ResponseQueryFailed()
 	}
 	score, cerr := strconv.ParseFloat(ctx.Query("score"), 64)
 	login_info := &lib.ReqGetScore{
-		Uid:    ctx.Query("uid"),
+		Uid:    uid,
 		Name:   ctx.Query("name"),
 		Credit: credit,
 		Score:  score,
@@ -40,11 +44,13 @@ func UploadScore(ctx *gin.Context) *response.Response {
 }
 
 func UploadScoreFile(ctx *gin.Context) *response.Response {
+	token := ctx.GetHeader("Authorization")
+	uid, _ := utils.VerifyToken(token)
 	file, err := ctx.FormFile("filename")
 	if err != nil {
 		return response.ResponseQueryFailed()
 	}
-	error := service.SaveScores(file, ctx.Query("uid"))
+	error := service.SaveScores(file, uid)
 	if error != nil {
 		return response.ResponseQueryFailed()
 	}
@@ -53,7 +59,8 @@ func UploadScoreFile(ctx *gin.Context) *response.Response {
 
 func GetStudentScores(ctx *gin.Context) *response.Response {
 	fmt.Printf("begin getting score\n")
-	uid := ctx.Query("uid")
+	token := ctx.GetHeader("Authorization")
+	uid, _ := utils.VerifyToken(token)
 	scores, SelectStudentScoreErr := service.GetScoresSql(uid)
 	if SelectStudentScoreErr != nil {
 		log.Println(SelectStudentScoreErr.Error())
